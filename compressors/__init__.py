@@ -1,0 +1,1 @@
+from .deflate import DeflateCompressor
