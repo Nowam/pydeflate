@@ -6,9 +6,8 @@ This test suite covers all compression algorithms and edge cases.
 """
 
 import unittest
-import tempfile
 import os
-from pathlib import Path
+import pytest
 
 from compressors import DeflateCompressor
 from compressors.lz77 import LZ77Compressor
@@ -20,36 +19,6 @@ from compressors.helpers.block_splitter import BlockSplitter
 class TestIntegerCompressor(unittest.TestCase):
     """Test the Integer compression algorithm."""
     
-    def test_encode_decode_single_number(self):
-        """Test encoding and decoding a single number."""
-        data = [42]
-        encoded = IntegerCompressor.encode(data)
-        decoded, remaining = IntegerCompressor.decode(encoded, 1)
-        self.assertEqual(decoded, data)
-        self.assertEqual(remaining, b'')
-    
-    def test_encode_decode_multiple_numbers(self):
-        """Test encoding and decoding multiple numbers."""
-        data = [1, 5, 10, 100, 255, 1000]
-        encoded = IntegerCompressor.encode(data)
-        decoded, remaining = IntegerCompressor.decode(encoded, len(data))
-        self.assertEqual(decoded, data)
-        self.assertEqual(remaining, b'')
-    
-    def test_encode_decode_zero(self):
-        """Test encoding and decoding zero."""
-        data = [0]
-        encoded = IntegerCompressor.encode(data)
-        decoded, remaining = IntegerCompressor.decode(encoded, 1)
-        self.assertEqual(decoded, data)
-    
-    def test_encode_decode_large_numbers(self):
-        """Test encoding and decoding large numbers."""
-        data = [65535, 1000000]
-        encoded = IntegerCompressor.encode(data)
-        decoded, remaining = IntegerCompressor.decode(encoded, len(data))
-        self.assertEqual(decoded, data)
-    
     def test_decode_insufficient_data(self):
         """Test decoding with insufficient data."""
         with self.assertRaises(ValueError):
@@ -59,6 +28,20 @@ class TestIntegerCompressor(unittest.TestCase):
         """Test decoding with invalid encoding."""
         with self.assertRaises(ValueError):
             IntegerCompressor.decode(b'1111', 1)
+
+
+@pytest.mark.parametrize("data,description", [
+    ([42], "single number"),
+    ([1, 5, 10, 100, 255, 1000], "multiple numbers"),
+    ([0], "zero"),
+    ([65535, 1000000], "large numbers"),
+])
+def test_integer_compressor_encode_decode_round_trip(data, description):
+    """Test encoding and decoding round trip for various data types."""
+    encoded = IntegerCompressor.encode(data)
+    decoded, remaining = IntegerCompressor.decode(encoded, len(data))
+    assert decoded == data
+    assert remaining == b''
 
 
 class TestHuffmanCompressor(unittest.TestCase):
@@ -80,7 +63,7 @@ class TestHuffmanCompressor(unittest.TestCase):
     
     def test_generate_dynamic_huffman_codes(self):
         """Test generating Huffman codes from bit lengths."""
-        bit_lengths = [2, 1, 3, 0, 2]
+        bit_lengths = [2, 1, 3, 0, 3]
         codes = HuffmanCompressor.generate_dynamic_huffman_codes(bit_lengths)
         
         # Check that all non-zero length symbols have codes
@@ -123,47 +106,26 @@ class TestHuffmanCompressor(unittest.TestCase):
 class TestLZ77Compressor(unittest.TestCase):
     """Test the LZ77 compression algorithm."""
     
-    def test_encode_decode_simple_string(self):
-        """Test encoding and decoding a simple string."""
-        data = b"hello world"
-        tokens = LZ77Compressor.encode(data)
-        decoded = LZ77Compressor.decode(tokens)
-        self.assertEqual(decoded, data)
-    
-    def test_encode_decode_repeated_pattern(self):
-        """Test encoding and decoding repeated patterns."""
-        data = b"abcabcabc"
-        tokens = LZ77Compressor.encode(data)
-        decoded = LZ77Compressor.decode(tokens)
-        self.assertEqual(decoded, data)
-    
-    def test_encode_decode_empty_data(self):
-        """Test encoding and decoding empty data."""
-        data = b""
-        tokens = LZ77Compressor.encode(data)
-        decoded = LZ77Compressor.decode(tokens)
-        self.assertEqual(decoded, data)
-    
-    def test_encode_decode_single_byte(self):
-        """Test encoding and decoding single byte."""
-        data = b"a"
-        tokens = LZ77Compressor.encode(data)
-        decoded = LZ77Compressor.decode(tokens)
-        self.assertEqual(decoded, data)
-    
-    def test_encode_decode_long_repetition(self):
-        """Test encoding and decoding long repetitions."""
-        data = b"a" * 1000
-        tokens = LZ77Compressor.encode(data)
-        decoded = LZ77Compressor.decode(tokens)
-        self.assertEqual(decoded, data)
-    
     def test_kmp_preprocessing(self):
         """Test KMP preprocessing algorithm."""
         pattern = b"abcabcab"
         table = LZ77Compressor._kmp_preprocess_pattern(pattern)
         self.assertEqual(len(table), len(pattern))
         self.assertIsInstance(table, list)
+
+
+@pytest.mark.parametrize("data,description", [
+    (b"hello world", "simple string"),
+    (b"abcabcabc", "repeated pattern"),
+    (b"", "empty data"),
+    (b"a", "single byte"),
+    (b"a" * 1000, "long repetition"),
+])
+def test_lz77_compressor_encode_decode_round_trip(data, description):
+    """Test encoding and decoding round trip for various data types."""
+    tokens = LZ77Compressor.encode(data)
+    decoded = LZ77Compressor.decode(tokens)
+    assert decoded == data
 
 
 class TestBlockSplitter(unittest.TestCase):
@@ -229,46 +191,17 @@ class TestBlockSplitter(unittest.TestCase):
 class TestDeflateCompressor(unittest.TestCase):
     """Test the main DEFLATE compression algorithm."""
     
-    def test_compress_decompress_empty_data(self):
-        """Test compressing and decompressing empty data."""
-        data = b""
-        compressed = DeflateCompressor.compress(data)
-        decompressed = DeflateCompressor.decompress(compressed)
-        self.assertEqual(decompressed, data)
-    
-    def test_compress_decompress_single_byte(self):
-        """Test compressing and decompressing single byte."""
-        data = b"a"
-        compressed = DeflateCompressor.compress(data)
-        decompressed = DeflateCompressor.decompress(compressed)
-        self.assertEqual(decompressed, data)
-    
-    def test_compress_decompress_simple_text(self):
-        """Test compressing and decompressing simple text."""
-        data = b"hello world"
-        compressed = DeflateCompressor.compress(data)
-        decompressed = DeflateCompressor.decompress(compressed)
-        self.assertEqual(decompressed, data)
-    
-    def test_compress_decompress_repeated_data(self):
-        """Test compressing and decompressing repeated data."""
-        data = b"abc" * 100
-        compressed = DeflateCompressor.compress(data)
-        decompressed = DeflateCompressor.decompress(compressed)
-        self.assertEqual(decompressed, data)
-    
     def test_compress_decompress_random_data(self):
         """Test compressing and decompressing random-like data."""
         import random
-        random.seed(42)  # For reproducible tests
+        random.seed(42)
         data = bytes([random.randint(0, 255) for _ in range(1000)])
         compressed = DeflateCompressor.compress(data)
         decompressed = DeflateCompressor.decompress(compressed)
         self.assertEqual(decompressed, data)
     
     def test_compress_decompress_large_file(self):
-        """Test compressing and decompressing larger data."""
-        # Create test data with patterns
+        """Test compressing and decompressing larger data with compression ratio check."""
         data = b"The quick brown fox jumps over the lazy dog. " * 1000
         compressed = DeflateCompressor.compress(data)
         decompressed = DeflateCompressor.decompress(compressed)
@@ -276,13 +209,20 @@ class TestDeflateCompressor(unittest.TestCase):
         
         # Check that compression actually happened
         self.assertLess(len(compressed) // 8, len(data))
-    
-    def test_compress_decompress_binary_data(self):
-        """Test compressing and decompressing binary data."""
-        data = bytes(range(256)) * 10
-        compressed = DeflateCompressor.compress(data)
-        decompressed = DeflateCompressor.decompress(compressed)
-        self.assertEqual(decompressed, data)
+
+
+@pytest.mark.parametrize("data,description", [
+    (b"", "empty data"),
+    (b"a", "single byte"),
+    (b"hello world", "simple text"),
+    (b"abc" * 100, "repeated data"),
+    (bytes(range(256)) * 10, "binary data"),
+])
+def test_deflate_compressor_compress_decompress_round_trip(data, description):
+    """Test compressing and decompressing round trip for various data types."""
+    compressed = DeflateCompressor.compress(data)
+    decompressed = DeflateCompressor.decompress(compressed)
+    assert decompressed == data
 
 
 class TestIntegration(unittest.TestCase):
@@ -311,36 +251,29 @@ class TestIntegration(unittest.TestCase):
             
         finally:
             os.unlink(tmp_input_path)
+
+
+@pytest.mark.parametrize("data,description,min_ratio", [
+    (b"a" * 1000, "highly repetitive", 50),
+    (b"The quick brown fox jumps over the lazy dog. " * 100, "natural text", 0),
+    (bytes(range(256)), "sequential bytes", 0),
+    (b"abc123XYZ!@#" * 100, "mixed content", 0),
+])
+def test_compression_ratios_different_data_types(data, description, min_ratio):
+    """Test compression ratios on different data types."""
+    compressed = DeflateCompressor.compress(data)
+    decompressed = DeflateCompressor.decompress(compressed)
     
-    def test_compression_ratios_different_data_types(self):
-        """Test compression ratios on different data types."""
-        test_cases = [
-            (b"a" * 1000, "highly repetitive"),
-            (b"The quick brown fox jumps over the lazy dog. " * 100, "natural text"),
-            (bytes(range(256)), "sequential bytes"),
-            (b"abc123XYZ!@#" * 100, "mixed content"),
-        ]
-        
-        for data, description in test_cases:
-            with self.subTest(description=description):
-                compressed = DeflateCompressor.compress(data)
-                decompressed = DeflateCompressor.decompress(compressed)
-                
-                # Verify correctness
-                self.assertEqual(decompressed, data)
-                
-                # Calculate compression ratio
-                original_size = len(data)
-                compressed_size = len(compressed) // 8
-                ratio = (1 - compressed_size / original_size) * 100
-                
-                # For highly repetitive data, we should see good compression
-                if "repetitive" in description:
-                    self.assertGreater(ratio, 50, f"Poor compression for {description}")
-                
-                print(f"{description}: {ratio:.2f}% compression")
-
-
-if __name__ == '__main__':
-    # Run with verbose output
-    unittest.main(verbosity=2)
+    # Verify correctness
+    assert decompressed == data
+    
+    # Calculate compression ratio
+    original_size = len(data)
+    compressed_size = len(compressed) // 8
+    ratio = (1 - compressed_size / original_size) * 100
+    
+    # Check minimum expected compression ratio
+    if min_ratio > 0:
+        assert ratio > min_ratio, f"Poor compression for {description}: {ratio:.2f}% < {min_ratio}%"
+    
+    print(f"{description}: {ratio:.2f}% compression")

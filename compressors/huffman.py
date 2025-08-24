@@ -50,6 +50,9 @@ class HuffmanCompressor:
         """
         Generate Huffman codes based on the bit lengths using the Deflate algorithm.
         """
+        if not bit_lengths or max(bit_lengths) == 0:
+            return {}
+            
         # Step 1: Count the number of codes for each bit length
         max_bits = max(bit_lengths)
         bl_count = [0] * (max_bits + 1)
@@ -61,8 +64,9 @@ class HuffmanCompressor:
         next_code = [0] * (max_bits + 1)
         code = 0
         for bits in range(1, max_bits + 1):
-            code = (code + bl_count[bits - 1]) << 1
+            code <<= 1
             next_code[bits] = code
+            code += bl_count[bits]
 
         # Step 3: Assign codes to symbols
         codes = {}
