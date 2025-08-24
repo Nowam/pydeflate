@@ -140,7 +140,8 @@ class HuffmanCompressor:
     @classmethod
     def decode_next(cls, data, code):
         current_bits = b""
-        for bit in data:
-            current_bits += bit.to_bytes(1, 'big')
+        for i, bit_char in enumerate(data):
+            current_bits += bytes([bit_char])
             if current_bits in code:
-                return code[current_bits], data[len(current_bits):]
+                return code[current_bits], data[i + 1:]
+        raise ValueError("No valid Huffman code found in data")

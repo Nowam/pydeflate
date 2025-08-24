@@ -161,6 +161,41 @@ class DistanceAlphabet:
         return base + extra_value, data[extra_bits:]
 
 
+def binary_string_to_bytes(binary_string: bytes) -> bytes:
+    """Convert binary string like b'01001100' to actual bytes with padding info."""
+    binary_str = binary_string.decode('ascii')
+    
+    # Store original length and pad to byte boundary
+    original_length = len(binary_str)
+    padding = (8 - (original_length % 8)) % 8
+    binary_str += '0' * padding
+    
+    # Encode original length as first 4 bytes (32-bit unsigned integer)
+    result = bytearray()
+    result.extend(original_length.to_bytes(4, 'big'))
+    
+    # Convert binary string to bytes
+    for i in range(0, len(binary_str), 8):
+        byte_str = binary_str[i:i+8]
+        result.append(int(byte_str, 2))
+    
+    return bytes(result)
+
+
+def bytes_to_binary_string(data: bytes) -> bytes:
+    """Convert bytes back to binary string for decompression."""
+    # Read original length from first 4 bytes
+    original_length = int.from_bytes(data[:4], 'big')
+    
+    # Convert remaining bytes to binary string
+    binary_str = ''.join(format(byte, '08b') for byte in data[4:])
+    
+    # Truncate to original length
+    binary_str = binary_str[:original_length]
+    
+    return binary_str.encode('ascii')
+
+
 class DeflateCompressor:
     @classmethod
     def compress(cls, data: bytes) -> bytes:
@@ -263,14 +298,14 @@ class DeflateCompressor:
 
             if len(res_dynamic) > len(res_fixed):
                 res += b'01' + res_fixed
-                print('Chose Fixed')
             else:
                 res += b'10' + res_dynamic
-                print('Chose Dynamic')
-        return res
+        return binary_string_to_bytes(res)
 
     @classmethod
     def decompress(cls, data: bytes) -> bytes:
+        # Convert bytes back to binary string format for processing
+        data = bytes_to_binary_string(data)
         tokens = []
         while data:
             # Read block header
@@ -316,5 +351,5 @@ class DeflateCompressor:
                     if literal == 256:
                         tokens.append((distance, length, None))
                         break
-                    tokens.append((distance, length, literal))  # todo: change order?
+                    tokens.append((distance, length, literal))
         return LZ77Compressor.decode(tokens)

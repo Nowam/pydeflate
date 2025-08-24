@@ -117,8 +117,8 @@ class LZ77Compressor:
             if length > 0:
                 start = len(data) - distance
                 for j in range(length):
-                    data += data[start + j].to_bytes()
+                    data += data[start + j].to_bytes(1, 'big')
             if next_character is not None:
-                data += next_character.to_bytes()
+                data += next_character.to_bytes(1, 'big')
 
         return data
