@@ -105,7 +105,6 @@ class HuffmanCompressor:
                 zero_count += 1
             else:
                 if zero_count > 0:
-                    # zero_count -= 1
                     code_lengths_compact.append(0)
                     if length == 0:
                         zero_count += 1

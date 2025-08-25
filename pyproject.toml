@@ -1,9 +1,68 @@
 [project]
-name = "compressor"
+name = "pydeflate"
 version = "0.1.0"
-description = "Add your description here"
+description = "A pure Python implementation of the DEFLATE compression algorithm"
 readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-    "pytest>=8.4.1",
+license = {file = "LICENSE"}
+authors = [
+    {name = "DEFLATE Compressor Team"},
 ]
+keywords = ["deflate", "compression", "lz77", "huffman", "algorithm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Archiving :: Compression",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.1",
+    "ruff>=0.12.10",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Nowam/pydeflate"
+"Repository" = "https://github.com/Nowam/pydeflate"
+"Bug Reports" = "https://github.com/Nowam/pydeflate/issues"
+
+[project.scripts]
+deflate-compress = "main:main"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings  
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "RUF",  # Ruff-specific rules
+]
+ignore = [
+    "E501",  # line too long, handled by formatter
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
