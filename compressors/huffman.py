@@ -1,12 +1,13 @@
 from collections import Counter
 from heapq import heappop, heappush
+from typing import ClassVar
 
-ALPHABET = [i for i in range(2**16)]
+ALPHABET = list(range(2**16))
 
 
 class HuffmanCompressor:
-    FIXED_BYTE_TO_CODE = {}
-    FIXED_CODE_TO_BYTE = {}
+    FIXED_BYTE_TO_CODE: ClassVar[dict] = {}
+    FIXED_CODE_TO_BYTE: ClassVar[dict] = {}
 
     def __init__(self):
         super().__init__()
@@ -24,7 +25,7 @@ class HuffmanCompressor:
         queue = []
         res = dict.fromkeys(frequencies, 0)
         for letter, frequency in frequencies.items():
-            heappush(queue, (frequency, tuple([letter])))
+            heappush(queue, (frequency, (letter,)))
         while len(queue) > 1:
             first_freq, first_letters = heappop(queue)
             second_freq, second_letters = heappop(queue)
@@ -85,7 +86,9 @@ class HuffmanCompressor:
         return decode_table
 
     @classmethod
-    def encode(cls, data, alphabet_length=len(ALPHABET), compress_counts=False):
+    def encode(cls, data, alphabet_length=None, compress_counts=False):
+        if alphabet_length is None:
+            alphabet_length = len(ALPHABET)
         code_lengths = cls._create_huffman_tree(
             cls._calculate_empirical_frequency(data)
         )

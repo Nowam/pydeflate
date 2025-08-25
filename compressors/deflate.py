@@ -20,7 +20,7 @@ FIXED_CODE_TO_DISTANCE = {v: k for k, v in FIXED_DISTANCE_TO_CODE.items()}
 
 
 class SymbolLengthAlphabet:
-    LENGTH_TABLE = [
+    LENGTH_TABLE = (
         (3, 0),
         (4, 0),
         (5, 0),
@@ -29,29 +29,29 @@ class SymbolLengthAlphabet:
         (8, 0),
         (9, 0),
         (10, 0),
-        # Codes 257–264
+        # Codes 257-264
         (11, 1),
         (13, 1),
         (15, 1),
-        (17, 1),  # Codes 265–268
+        (17, 1),  # Codes 265-268
         (19, 2),
         (23, 2),
         (27, 2),
-        (31, 2),  # Codes 269–272
+        (31, 2),  # Codes 269-272
         (35, 3),
         (43, 3),
         (51, 3),
-        (59, 3),  # Codes 273–276
+        (59, 3),  # Codes 273-276
         (67, 4),
         (83, 4),
         (99, 4),
-        (115, 4),  # Codes 277–280
+        (115, 4),  # Codes 277-280
         (131, 5),
         (163, 5),
         (195, 5),
-        (227, 5),  # Codes 281–284
+        (227, 5),  # Codes 281-284
         (258, 0),  # Code 285
-    ]
+    )
 
     @classmethod
     def decode(cls, symbol, extra_bits):
@@ -109,38 +109,38 @@ class SymbolLengthAlphabet:
 
 
 class DistanceAlphabet:
-    DISTANCE_TABLE = [
+    DISTANCE_TABLE = (
         (1, 0),
         (2, 0),
         (3, 0),
-        (4, 0),  # Codes 0–3
+        (4, 0),  # Codes 0-3
         (5, 1),
-        (7, 1),  # Codes 4–5
+        (7, 1),  # Codes 4-5
         (9, 2),
-        (13, 2),  # Codes 6–7
+        (13, 2),  # Codes 6-7
         (17, 3),
-        (25, 3),  # Codes 8–9
+        (25, 3),  # Codes 8-9
         (33, 4),
-        (49, 4),  # Codes 10–11
+        (49, 4),  # Codes 10-11
         (65, 5),
-        (97, 5),  # Codes 12–13
+        (97, 5),  # Codes 12-13
         (129, 6),
-        (193, 6),  # Codes 14–15
+        (193, 6),  # Codes 14-15
         (257, 7),
-        (385, 7),  # Codes 16–17
+        (385, 7),  # Codes 16-17
         (513, 8),
-        (769, 8),  # Codes 18–19
+        (769, 8),  # Codes 18-19
         (1025, 9),
-        (1537, 9),  # Codes 20–21
+        (1537, 9),  # Codes 20-21
         (2049, 10),
-        (3073, 10),  # Codes 22–23
+        (3073, 10),  # Codes 22-23
         (4097, 11),
-        (6145, 11),  # Codes 24–25
+        (6145, 11),  # Codes 24-25
         (8193, 12),
-        (12289, 12),  # Codes 26–27
+        (12289, 12),  # Codes 26-27
         (16385, 13),
-        (24577, 13),  # Codes 28–29
-    ]
+        (24577, 13),  # Codes 28-29
+    )
 
     @classmethod
     def encode(cls, distance):
