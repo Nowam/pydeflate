@@ -48,8 +48,10 @@ class BlockSplitter:
         changes and block length.
         """
         # First check if we have enough observations
-        if (self.num_new_observations < self.NUM_OBSERVATIONS_PER_BLOCK_CHECK or
-                block_length < self.MIN_BLOCK_LENGTH):
+        if (
+            self.num_new_observations < self.NUM_OBSERVATIONS_PER_BLOCK_CHECK
+            or block_length < self.MIN_BLOCK_LENGTH
+        ):
             return False
 
         if self.num_observations == 0:

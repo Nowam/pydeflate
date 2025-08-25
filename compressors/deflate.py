@@ -5,29 +5,51 @@ from compressors.lz77 import LZ77Compressor
 
 FIXED_LENGTH_TO_CODE = {}
 for i in range(0, 144):
-    FIXED_LENGTH_TO_CODE[i] = format(i + 48, '#010b')[2:].encode()
+    FIXED_LENGTH_TO_CODE[i] = format(i + 48, "#010b")[2:].encode()
 for i in range(0, 112):
-    FIXED_LENGTH_TO_CODE[i + 144] = format(i + 400, '#011b')[2:].encode()
+    FIXED_LENGTH_TO_CODE[i + 144] = format(i + 400, "#011b")[2:].encode()
 for i in range(0, 24):
-    FIXED_LENGTH_TO_CODE[256 + i] = format(i, '#09b')[2:].encode()
+    FIXED_LENGTH_TO_CODE[256 + i] = format(i, "#09b")[2:].encode()
 for i in range(0, 8):
-    FIXED_LENGTH_TO_CODE[280 + i] = format(i + 192, '#010b')[2:].encode()
+    FIXED_LENGTH_TO_CODE[280 + i] = format(i + 192, "#010b")[2:].encode()
 
 FIXED_CODE_TO_LENGTH = {v: k for k, v in FIXED_LENGTH_TO_CODE.items()}
 
-FIXED_DISTANCE_TO_CODE = {i: format(i, '#07b')[2:].encode() for i in range(0, 32)}
+FIXED_DISTANCE_TO_CODE = {i: format(i, "#07b")[2:].encode() for i in range(0, 32)}
 FIXED_CODE_TO_DISTANCE = {v: k for k, v in FIXED_DISTANCE_TO_CODE.items()}
 
 
 class SymbolLengthAlphabet:
     LENGTH_TABLE = [
-        (3, 0), (4, 0), (5, 0), (6, 0), (7, 0), (8, 0), (9, 0), (10, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+        (8, 0),
+        (9, 0),
+        (10, 0),
         # Codes 257–264
-        (11, 1), (13, 1), (15, 1), (17, 1),  # Codes 265–268
-        (19, 2), (23, 2), (27, 2), (31, 2),  # Codes 269–272
-        (35, 3), (43, 3), (51, 3), (59, 3),  # Codes 273–276
-        (67, 4), (83, 4), (99, 4), (115, 4),  # Codes 277–280
-        (131, 5), (163, 5), (195, 5), (227, 5),  # Codes 281–284
+        (11, 1),
+        (13, 1),
+        (15, 1),
+        (17, 1),  # Codes 265–268
+        (19, 2),
+        (23, 2),
+        (27, 2),
+        (31, 2),  # Codes 269–272
+        (35, 3),
+        (43, 3),
+        (51, 3),
+        (59, 3),  # Codes 273–276
+        (67, 4),
+        (83, 4),
+        (99, 4),
+        (115, 4),  # Codes 277–280
+        (131, 5),
+        (163, 5),
+        (195, 5),
+        (227, 5),  # Codes 281–284
         (258, 0),  # Code 285
     ]
 
@@ -88,20 +110,36 @@ class SymbolLengthAlphabet:
 
 class DistanceAlphabet:
     DISTANCE_TABLE = [
-        (1, 0), (2, 0), (3, 0), (4, 0),  # Codes 0–3
-        (5, 1), (7, 1),  # Codes 4–5
-        (9, 2), (13, 2),  # Codes 6–7
-        (17, 3), (25, 3),  # Codes 8–9
-        (33, 4), (49, 4),  # Codes 10–11
-        (65, 5), (97, 5),  # Codes 12–13
-        (129, 6), (193, 6),  # Codes 14–15
-        (257, 7), (385, 7),  # Codes 16–17
-        (513, 8), (769, 8),  # Codes 18–19
-        (1025, 9), (1537, 9),  # Codes 20–21
-        (2049, 10), (3073, 10),  # Codes 22–23
-        (4097, 11), (6145, 11),  # Codes 24–25
-        (8193, 12), (12289, 12),  # Codes 26–27
-        (16385, 13), (24577, 13),  # Codes 28–29
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),  # Codes 0–3
+        (5, 1),
+        (7, 1),  # Codes 4–5
+        (9, 2),
+        (13, 2),  # Codes 6–7
+        (17, 3),
+        (25, 3),  # Codes 8–9
+        (33, 4),
+        (49, 4),  # Codes 10–11
+        (65, 5),
+        (97, 5),  # Codes 12–13
+        (129, 6),
+        (193, 6),  # Codes 14–15
+        (257, 7),
+        (385, 7),  # Codes 16–17
+        (513, 8),
+        (769, 8),  # Codes 18–19
+        (1025, 9),
+        (1537, 9),  # Codes 20–21
+        (2049, 10),
+        (3073, 10),  # Codes 22–23
+        (4097, 11),
+        (6145, 11),  # Codes 24–25
+        (8193, 12),
+        (12289, 12),  # Codes 26–27
+        (16385, 13),
+        (24577, 13),  # Codes 28–29
     ]
 
     @classmethod
@@ -163,37 +201,37 @@ class DistanceAlphabet:
 
 def binary_string_to_bytes(binary_string: bytes) -> bytes:
     """Convert binary string like b'01001100' to actual bytes with padding info."""
-    binary_str = binary_string.decode('ascii')
-    
+    binary_str = binary_string.decode("ascii")
+
     # Store original length and pad to byte boundary
     original_length = len(binary_str)
     padding = (8 - (original_length % 8)) % 8
-    binary_str += '0' * padding
-    
+    binary_str += "0" * padding
+
     # Encode original length as first 4 bytes (32-bit unsigned integer)
     result = bytearray()
-    result.extend(original_length.to_bytes(4, 'big'))
-    
+    result.extend(original_length.to_bytes(4, "big"))
+
     # Convert binary string to bytes
     for i in range(0, len(binary_str), 8):
-        byte_str = binary_str[i:i+8]
+        byte_str = binary_str[i : i + 8]
         result.append(int(byte_str, 2))
-    
+
     return bytes(result)
 
 
 def bytes_to_binary_string(data: bytes) -> bytes:
     """Convert bytes back to binary string for decompression."""
     # Read original length from first 4 bytes
-    original_length = int.from_bytes(data[:4], 'big')
-    
+    original_length = int.from_bytes(data[:4], "big")
+
     # Convert remaining bytes to binary string
-    binary_str = ''.join(format(byte, '08b') for byte in data[4:])
-    
+    binary_str = "".join(format(byte, "08b") for byte in data[4:])
+
     # Truncate to original length
     binary_str = binary_str[:original_length]
-    
-    return binary_str.encode('ascii')
+
+    return binary_str.encode("ascii")
 
 
 class DeflateCompressor:
@@ -242,7 +280,7 @@ class DeflateCompressor:
         # Don't forget the last block
         if current_block:
             blocks.append(current_block)
-        res = b''
+        res = b""
         for block_tokens in blocks:
             # add block header based on: 00 - no compression, 01 - fixed, 10 - dynamic
             literal_length_distance_pairs = []
@@ -251,44 +289,60 @@ class DeflateCompressor:
                 if distance != 0:
                     # Encode lengths and distances
                     length_symbol, length_extra_value = SymbolLengthAlphabet.encode(
-                        length)
+                        length
+                    )
                     distance_symbol, distance_extra_value = DistanceAlphabet.encode(
-                        distance)
+                        distance
+                    )
                     literal_length_distance_pairs.append(
-                        (length_symbol, length_extra_value,
-                         distance_symbol,
-                         distance_extra_value))
+                        (
+                            length_symbol,
+                            length_extra_value,
+                            distance_symbol,
+                            distance_extra_value,
+                        )
+                    )
                 if symbol is not None:
                     # Encode literals directly
                     literal_length_distance_pairs.append((symbol, None, None, None))
             # add end
             literal_length_distance_pairs.append((256, None, None, None))
-            res_dynamic = b''
+            res_dynamic = b""
             # Compress the literal/length and distance symbols using separate Huffman
             # codes
             literal_length_bit_lengths, literal_length_code = (
                 HuffmanCompressor.create_codes(
-                    [t[0] for t in literal_length_distance_pairs], alphabet_length=286))
+                    [t[0] for t in literal_length_distance_pairs], alphabet_length=286
+                )
+            )
             distance_bit_lengths, distance_code = HuffmanCompressor.create_codes(
                 [t[2] for t in literal_length_distance_pairs if t[2] is not None],
-                alphabet_length=30)
+                alphabet_length=30,
+            )
             # write the trees, compressed literal/length and distance
             res_dynamic += IntegerCompressor.encode(
-                [*literal_length_bit_lengths, *distance_bit_lengths])
-            for (literal_length, literal_length_extra_value, distance,
-                 distance_extra_value) \
-                    in literal_length_distance_pairs:
+                [*literal_length_bit_lengths, *distance_bit_lengths]
+            )
+            for (
+                literal_length,
+                literal_length_extra_value,
+                distance,
+                distance_extra_value,
+            ) in literal_length_distance_pairs:
                 res_dynamic += literal_length_code[literal_length]
                 if literal_length_extra_value is not None:
                     res_dynamic += literal_length_extra_value
                 if distance is not None:
                     res_dynamic += distance_code[distance]
                     res_dynamic += distance_extra_value
-            res_fixed = b''
+            res_fixed = b""
             # Compress with fixed codes
-            for (literal_length, literal_length_extra_value, distance,
-                 distance_extra_value) \
-                    in literal_length_distance_pairs:
+            for (
+                literal_length,
+                literal_length_extra_value,
+                distance,
+                distance_extra_value,
+            ) in literal_length_distance_pairs:
                 res_fixed += FIXED_LENGTH_TO_CODE[literal_length]
                 if literal_length_extra_value is not None:
                     res_fixed += literal_length_extra_value
@@ -297,9 +351,9 @@ class DeflateCompressor:
                     res_fixed += distance_extra_value
 
             if len(res_dynamic) > len(res_fixed):
-                res += b'01' + res_fixed
+                res += b"01" + res_fixed
             else:
-                res += b'10' + res_dynamic
+                res += b"10" + res_dynamic
         return binary_string_to_bytes(res)
 
     @classmethod
@@ -310,14 +364,16 @@ class DeflateCompressor:
         while data:
             # Read block header
             block_header, data = data[:2], data[2:]
-            if block_header == b'10':
+            if block_header == b"10":
                 length_literal_bit_lengths, data = IntegerCompressor.decode(data, 286)
                 distance_bit_lengths, data = IntegerCompressor.decode(data, 30)
                 # Decompress using Huffman trees
                 length_literal_code = HuffmanCompressor.generate_decode_table(
-                    length_literal_bit_lengths)
+                    length_literal_bit_lengths
+                )
                 distance_code = HuffmanCompressor.generate_decode_table(
-                    distance_bit_lengths)
+                    distance_bit_lengths
+                )
             else:  # block_header == b'01':
                 length_literal_code = FIXED_CODE_TO_LENGTH
                 distance_code = FIXED_CODE_TO_DISTANCE
@@ -334,8 +390,9 @@ class DeflateCompressor:
                       end loop
             """
             while True:
-                literal_length, data = HuffmanCompressor.decode_next(data,
-                                                                     length_literal_code)
+                literal_length, data = HuffmanCompressor.decode_next(
+                    data, length_literal_code
+                )
                 if literal_length < 256:
                     tokens.append((0, 0, literal_length))
                 elif literal_length == 256:
@@ -343,11 +400,13 @@ class DeflateCompressor:
                 else:
                     # format is length, distance, literal
                     length, data = SymbolLengthAlphabet.decode(literal_length, data)
-                    distance_symbol, data = HuffmanCompressor.decode_next(data,
-                                                                          distance_code)
+                    distance_symbol, data = HuffmanCompressor.decode_next(
+                        data, distance_code
+                    )
                     distance, data = DistanceAlphabet.decode(distance_symbol, data)
-                    literal, data = HuffmanCompressor.decode_next(data,
-                                                                  length_literal_code)
+                    literal, data = HuffmanCompressor.decode_next(
+                        data, length_literal_code
+                    )
                     if literal == 256:
                         tokens.append((distance, length, None))
                         break
